@@ -5,14 +5,15 @@ const tokens = n => ethers.utils.parseUnits(n.toString(), 'ether')
 
 
 describe('Token', () => { 
-    let token;
-    const NAME = "Dex Token"
-    const SYMBOL = "DXT"
-    const TOTAL_SUPPLY = 2000000
+    let token, accounts, deployer;
+    const [ NAME, SYMBOL, TOTAL_SUPPLY ]  = [ "Dex Token", "DXT", 2000000 ]
 
     beforeEach(async () => {
         const Token = await ethers.getContractFactory('Token')
         token = await Token.deploy(NAME, SYMBOL, TOTAL_SUPPLY)
+
+        accounts = await ethers.getSigners()
+        deployer = accounts[0]
     })
 
     describe("Deployment", () => {
@@ -30,6 +31,10 @@ describe('Token', () => {
 
         it('has correct total supply', async () => {
             expect(await token.totalSupply()).to.equal(tokens(TOTAL_SUPPLY))
+        })
+
+        it('assigns total supply to deployer', async () => {
+            expect(await token.balanceOf(deployer.address)).to.equal(tokens(TOTAL_SUPPLY))
         })
     })
 })
