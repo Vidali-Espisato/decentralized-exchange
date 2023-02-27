@@ -78,7 +78,7 @@ describe('Token', () => {
             let transaction, result, amount;
             
             beforeEach(async () => {
-                const tx = await token.connect(deployer).transfer(user1.address, tokens(100))
+                const tx = await token.connect(deployer).transfer(user1.address, tokens(10))
                 await tx.wait()
 
                 amount = tokens(5)
@@ -105,9 +105,56 @@ describe('Token', () => {
                 await expect(transaction).to.be.reverted
             })
 
-            it('rejects invalid spenders', async () => {
+            it('rejects invalid spender', async () => {
                 const transaction = token.connect(user1).approve('0x0000000000000000000000000000000000000000', amount)
                 await expect(transaction).to.be.reverted
+            })
+
+            describe("Delegation of transactions", () => {
+                let tx, res, amt;
+
+                beforeEach(async () => {
+                    amt = tokens(1)
+                    tx = await token.connect(exchange).transferFrom(user1.address, user2.address, amt)
+                    res = await tx.wait()
+                })
+
+                it('processes the required transfer', async () => {
+                    expect(await token.balanceOf(user1.address)).to.be.equal(tokens(9))
+                    expect(await token.balanceOf(user2.address)).to.be.equal(amt)
+                })
+
+                it('emits a Transfer event', async () => {
+                    const event = res.events[0]
+                    expect(event.event).to.equal('Transfer')
+        
+                    const eventArgs = event.args
+                    expect(eventArgs.from).to.equal(user1.address)
+                    expect(eventArgs.to).to.equal(user2.address)
+                    expect(eventArgs.value).to.equal(amt)
+                })
+
+                it('decreases the allowance by tokens spent', async () => {
+                    expect(await token.allowance(user1.address, exchange.address)).to.be.equal(tokens(4))
+                })
+
+                it('rejects transfers more than the allowance', async () => {
+                    tx = token.connect(exchange).transferFrom(user1.address, user2.address, tokens(6))
+                    await expect(tx).to.be.reverted
+                })
+
+                it('rejects invalid receiver', async () => {
+                    tx = token.connect(exchange).transferFrom(user1.address, '0x0000000000000000000000000000000000000000', amt)
+                    await expect(tx).to.be.reverted
+                })
+
+                it('resets allowance if and when total allowed tokens spent', async () => {
+                    tx = token.connect(exchange).transferFrom(user1.address, user2.address, tokens(4))
+                    expect(await token.balanceOf(user1.address)).to.be.equal(tokens(5))
+                    expect(await token.balanceOf(user2.address)).to.be.equal(tokens(5))
+
+                    expect(await token.allowance(user1.address, exchange.address)).to.be.equal(0)
+                })
             })
         })
     })

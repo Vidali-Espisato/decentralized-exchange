@@ -31,19 +31,34 @@ contract Token {
         balanceOf[msg.sender] = totalSupply;
     }
 
-    function transfer(address _to, uint256 _value) public returns (bool success) {
-        require(_value < balanceOf[msg.sender], "Amount should not be greater than sender's balance.");
+    function _transfer(address _from, address _to, uint256 _value) internal {
         require(_to != address(0), "Receiver cannot be a null account.");
-
-        balanceOf[msg.sender] -= _value;
+        
+        balanceOf[_from] -= _value;
         balanceOf[_to] += _value;
 
-        emit Transfer(msg.sender, _to, _value);
+        emit Transfer(_from, _to, _value);
+    }
+
+    function transfer(address _to, uint256 _value) public returns (bool success) {
+        require(_value <= balanceOf[msg.sender], "Amount should not be greater than sender's balance.");
+
+        _transfer(msg.sender, _to, _value);
+        return true;
+    }
+
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        require(_value <= balanceOf[_from], "Amount should not be greater than signer's balance");        
+        require(_value <= allowance[_from][msg.sender], "Value must not be more than allowance set.");
+
+        _transfer(_from, _to, _value);
+
+        allowance[_from][msg.sender] -= _value;
         return true;
     }
 
     function approve(address _spender, uint256 _value) public returns (bool success) {
-        require(_value < balanceOf[msg.sender], "Amount should not be greater than signer's balance.");
+        require(_value <= balanceOf[msg.sender], "Amount should not be greater than signer's balance.");
         require(_spender != address(0), "Spender cannot be a null address.");
 
         allowance[msg.sender][_spender] = _value;
@@ -51,5 +66,4 @@ contract Token {
         emit Approval(msg.sender, _spender, _value);
         return true;
     }
-
 }
