@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: SEE LICENSE IN LICENSE
 pragma solidity ^0.8.2;
 
-// import "hardhat/console.sol";
 
 contract Token {
     string public name;
@@ -10,12 +9,19 @@ contract Token {
     uint256 public totalSupply; 
 
     mapping(address => uint256) public balanceOf;
+    mapping(address => mapping(address => uint256)) public allowance;
 
     event Transfer(
         address indexed from,
         address indexed to,
         uint256 value
     ); 
+
+    event Approval(
+        address indexed owner,
+        address indexed spender,
+        uint256 value
+    );
 
     constructor(string memory _name, string memory _symbol, uint256 _totalSupply) {
         name = _name;
@@ -27,7 +33,7 @@ contract Token {
 
     function transfer(address _to, uint256 _value) public returns (bool success) {
         require(_value < balanceOf[msg.sender], "Amount should not be greater than sender's balance.");
-        require(_to != address(0), "Cannot transfer to null account.");
+        require(_to != address(0), "Receiver cannot be a null account.");
 
         balanceOf[msg.sender] -= _value;
         balanceOf[_to] += _value;
@@ -36,15 +42,13 @@ contract Token {
         return true;
     }
 
-    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
-        require(_value < balanceOf[_from], "Amount should not be greater than sender's balance.");
-        require(_from != address(0), "Cannot transfer from null account.");
-        require(_to != address(0), "Cannot transfer to null account.");
+    function approve(address _spender, uint256 _value) public returns (bool success) {
+        require(_value < balanceOf[msg.sender], "Amount should not be greater than signer's balance.");
+        require(_spender != address(0), "Spender cannot be a null address.");
 
-        balanceOf[_from] -= _value;
-        balanceOf[_to] += _value;
+        allowance[msg.sender][_spender] = _value;
 
-        emit Transfer(_from, _to, _value);
+        emit Approval(msg.sender, _spender, _value);
         return true;
     }
 
