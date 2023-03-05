@@ -16,16 +16,32 @@ contract Exchange {
         uint256 balance
     );
 
+    event Withdraw(
+        address token, 
+        address user, 
+        uint256 amount, 
+        uint256 balance
+    );
+
     constructor(address _feeAccount, uint256 _feePercent) {
         feeAccount = _feeAccount;
         feePercent = _feePercent;
     }
 
-    function depositToken(address _token, uint256 _amount) public  {
+    function depositToken(address _token, uint256 _amount) public {
         require(Token(_token).transferFrom(msg.sender, address(this), _amount));
         tokens[_token][msg.sender] += _amount;
 
         emit Deposit(_token, msg.sender, _amount, balanceOf(_token, msg.sender));
+    }
+
+    function withdrawToken(address _token, uint256 _amount) public {
+        require(balanceOf(_token, msg.sender) >= _amount, "Insufficient balance to withdraw");
+
+        require(Token(_token).transfer(msg.sender, _amount));
+        tokens[_token][msg.sender] -= _amount;
+
+        emit Withdraw(_token, msg.sender, _amount, balanceOf(_token, msg.sender));
     }
 
     function balanceOf(address _token, address _user) public view returns (uint256) {

@@ -65,4 +65,40 @@ describe('Exchange', () => {
             await expect(exchange.connect(user1).depositToken(token1.address, amount)).to.be.reverted
         })
     })
+
+    describe('Withdrawing Tokens', () => {
+        let transaction, result;
+        let amount = tokens(5);
+
+        beforeEach(async () => {
+            transaction = await token1.connect(user1).approve(exchange.address, amount)
+            await transaction.wait()
+
+            transaction = await exchange.connect(user1).depositToken(token1.address, amount)
+            await transaction.wait()
+
+            transaction = await exchange.connect(user1).withdrawToken(token1.address, amount)
+            result = await transaction.wait()
+        })
+
+        it('tracks the token withdrawal', async () => {
+            expect(await token1.balanceOf(exchange.address)).to.equal(0)
+            expect(await exchange.balanceOf(token1.address, user1.address)).to.be.equal(0)
+        })
+
+        it('emits a Withdraw event', async () => {
+            const event = result.events[1]
+            expect(event.event).to.equal('Withdraw')
+
+            const eventArgs = event.args
+            expect(eventArgs.token).to.equal(token1.address)
+            expect(eventArgs.user).to.equal(user1.address)
+            expect(eventArgs.amount).to.equal(amount)
+            expect(eventArgs.balance).to.equal(0)
+        })
+
+        it('fails when insufficient balance available', async () => {
+            await expect(exchange.connect(user1).withdrawToken(token1.address, amount)).to.be.reverted
+        })
+    })
 })
