@@ -105,8 +105,7 @@ describe('Exchange', () => {
         })
     })
 
-
-    describe('Withdrawing Tokens', () => {
+    describe('Creating Order', () => {
         let transaction, result;
         let amount = tokens(5);
 
@@ -140,6 +139,50 @@ describe('Exchange', () => {
 
         it('fails when insufficient balance available', async () => {
             await expect(exchange.connect(user2).makeOrder(token2.address, tokens(10), token1.address, amount)).to.be.reverted
+        })
+    })
+
+    describe('Cancelling Order', () => {
+        let transaction, result;
+        let amount = tokens(5);
+
+        beforeEach(async () => {
+            transaction = await token2.connect(user2).approve(exchange.address, amount)
+            await transaction.wait()
+
+            transaction = await exchange.connect(user2).depositToken(token2.address, amount)
+            await transaction.wait()
+
+            transaction = await exchange.connect(user2).makeOrder(token2.address, tokens(1), token1.address, tokens(1))
+            await transaction.wait()
+        
+            transaction = await exchange.connect(user2).cancelOrder(1)
+            result = await transaction.wait()
+        })
+
+        it('checks if order has been recorded as cancelled', async () => {
+            expect(await exchange.connect(user2).cancelledOrders(1)).to.be.equal(true)
+        })
+
+        it('emits an CancelledOrder event', async () => {
+            const event = result.events[0]
+            expect(event.event).to.equal('CancelledOrder')
+
+            const eventArgs = event.args
+            expect(eventArgs.user).to.equal(user2.address)
+            expect(eventArgs.oToken).to.equal(token2.address)
+            expect(eventArgs.oAmount).to.equal(tokens(1))
+            expect(eventArgs.iToken).to.equal(token1.address)
+            expect(eventArgs.iAmount).to.equal(tokens(1))
+            expect(eventArgs.timestamp).to.at.least(1)
+        })
+
+        it('rejects invalid order ids', async () => {
+            await expect(exchange.connect(user2).cancelOrder(999)).to.be.reverted
+        })
+
+        it('rejects unauthorized users', async () => {
+            await expect(exchange.connect(user1).cancelOrder(1)).to.be.reverted
         })
     })
 })

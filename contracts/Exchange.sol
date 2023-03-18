@@ -10,6 +10,8 @@ contract Exchange {
 
     mapping (address => mapping (address => uint256)) tokens;
     mapping (uint256 => _Order) orders;
+    mapping (uint256 => bool) public cancelledOrders;
+
     event Deposit(
         address token, 
         address user, 
@@ -25,6 +27,16 @@ contract Exchange {
     );
 
     event Order(
+        uint256 _id,
+        address user,
+        address iToken,
+        uint256 iAmount,
+        address oToken,
+        uint256 oAmount,
+        uint256 timestamp
+    );
+
+    event CancelledOrder(
         uint256 _id,
         address user,
         address iToken,
@@ -75,5 +87,14 @@ contract Exchange {
         ordersCount++;
         orders[ordersCount] = _Order(ordersCount, msg.sender, _iToken, _iAmount, _oToken, _oAmount, block.timestamp);
         emit Order(ordersCount, msg.sender, _iToken, _iAmount, _oToken, _oAmount, block.timestamp);
+    }
+
+    function cancelOrder(uint256 _id) public {
+        _Order memory _order = orders[_id];
+        require(_order._id == _id);
+        require(address(_order.user) == msg.sender);
+
+        cancelledOrders[_id] = true;
+        emit CancelledOrder(_order._id, msg.sender, _order.iToken, _order.iAmount, _order.oToken, _order.oAmount, block.timestamp);
     }
 }
