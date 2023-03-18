@@ -17,10 +17,13 @@ describe('Exchange', () => {
         
         const Token = await ethers.getContractFactory('Token')
         token1 = await Token.deploy('Dex Token', 'DXT', 100000)
-        token2 = await Token.deploy('Wrapped Dai', 'mDAI', 50000)
+        token2 = await Token.deploy('Wrapped Dai', 'mDAI', 100000)
         
-        const tx = await token1.connect(deployer).transfer(user1.address, tokens(100))
-        await tx.wait()
+        const tx1 = await token1.connect(deployer).transfer(user1.address, tokens(100))
+        await tx1.wait()
+
+        const tx2 = await token2.connect(deployer).transfer(user2.address, tokens(100))
+        await tx2.wait()
     })
 
     describe("Deployment", () => {
@@ -99,6 +102,44 @@ describe('Exchange', () => {
 
         it('fails when insufficient balance available', async () => {
             await expect(exchange.connect(user1).withdrawToken(token1.address, amount)).to.be.reverted
+        })
+    })
+
+
+    describe('Withdrawing Tokens', () => {
+        let transaction, result;
+        let amount = tokens(5);
+
+        beforeEach(async () => {
+            transaction = await token2.connect(user2).approve(exchange.address, amount)
+            await transaction.wait()
+
+            transaction = await exchange.connect(user2).depositToken(token2.address, amount)
+            await transaction.wait()
+
+            transaction = await exchange.connect(user2).makeOrder(token2.address, tokens(1), token1.address, tokens(1))
+            result = await transaction.wait()
+        })
+
+        it('tracks the orders count', async () => {
+            expect(await exchange.ordersCount()).to.be.equal(1)
+        })
+
+        it('emits an Order event', async () => {
+            const event = result.events[0]
+            expect(event.event).to.equal('Order')
+
+            const eventArgs = event.args
+            expect(eventArgs.user).to.equal(user2.address)
+            expect(eventArgs.oToken).to.equal(token2.address)
+            expect(eventArgs.oAmount).to.equal(tokens(1))
+            expect(eventArgs.iToken).to.equal(token1.address)
+            expect(eventArgs.iAmount).to.equal(tokens(1))
+            expect(eventArgs.timestamp).to.at.least(1)
+        })
+
+        it('fails when insufficient balance available', async () => {
+            await expect(exchange.connect(user2).makeOrder(token2.address, tokens(10), token1.address, amount)).to.be.reverted
         })
     })
 })
