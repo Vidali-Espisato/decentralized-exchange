@@ -11,18 +11,19 @@ contract Exchange {
     mapping (address => mapping (address => uint256)) tokens;
     mapping (uint256 => _Order) orders;
     mapping (uint256 => bool) public cancelledOrders;
+    mapping (uint256 => bool) public filledOrders;
 
     event Deposit(
-        address token, 
-        address user, 
-        uint256 amount, 
+        address token,
+        address user,
+        uint256 amount,
         uint256 balance
     );
 
     event Withdraw(
-        address token, 
-        address user, 
-        uint256 amount, 
+        address token,
+        address user,
+        uint256 amount,
         uint256 balance
     );
 
@@ -39,6 +40,17 @@ contract Exchange {
     event CancelledOrder(
         uint256 _id,
         address user,
+        address iToken,
+        uint256 iAmount,
+        address oToken,
+        uint256 oAmount,
+        uint256 timestamp
+    );
+
+    event Trade(
+        uint256 _id,
+        address createdBy,
+        address filledBy,
         address iToken,
         uint256 iAmount,
         address oToken,
@@ -96,5 +108,31 @@ contract Exchange {
 
         cancelledOrders[_id] = true;
         emit CancelledOrder(_order._id, msg.sender, _order.iToken, _order.iAmount, _order.oToken, _order.oAmount, block.timestamp);
+    }
+
+    function fillOrder(uint256 _id) public {
+        require(_id > 0 && _id <= ordersCount);
+
+        require(!cancelledOrders[_id]);
+        require(!filledOrders[_id]);
+
+        _Order memory _order = orders[_id];
+
+        _trade(_order._id, _order.user, _order.iToken, _order.iAmount, _order.oToken, _order.oAmount);
+        filledOrders[_id] = true;
+    }
+
+    function _trade(uint256 orderId, address user, address iToken, uint256 iAmount, address oToken, uint256 oAmount) internal {
+        uint256 _feeAmount = (iAmount * feePercent) / 100;
+
+        tokens[iToken][msg.sender] -= (iAmount + _feeAmount);
+        tokens[iToken][user] += iAmount;
+
+        tokens[iToken][feeAccount] += _feeAmount;
+
+        tokens[oToken][user] -= oAmount;
+        tokens[oToken][msg.sender] += oAmount;
+
+        emit Trade(orderId, user, msg.sender, iToken, iAmount, oToken, oAmount, block.timestamp);
     }
 }
