@@ -7,11 +7,11 @@ function App() {
   const dispatch = useDispatch()
 
   const loadBlockChainData = async () => {
-    const account = await handleAccount(dispatch)
-    console.log(account)
-
     const provider = handleProvider(dispatch)
     const chainId = await handleNetwork(provider, dispatch)
+
+    const account = await handleAccount(provider, dispatch)
+    console.log(account)
 
     const exchange = await handleContract(chainId, "exchange", provider, dispatch)
     console.log(exchange.address)

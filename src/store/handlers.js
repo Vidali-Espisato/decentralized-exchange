@@ -19,9 +19,14 @@ const handleNetwork = async (provider, dispatch) => {
 }
 
 
-const handleAccount = async dispatch => {
+const handleAccount = async (provider, dispatch) => {
     const accounts = await window.ethereum.request({method: "eth_requestAccounts"})
-    const account = ethers.utils.getAddress(accounts[0])
+    const address = ethers.utils.getAddress(accounts[0])
+
+    let balance = await provider.getBalance(address)
+    balance = ethers.utils.formatEther(balance)
+
+    const account = { address, balance }
     dispatch({ type: "ACCOUNT_LOADED", account })
 
     return account
