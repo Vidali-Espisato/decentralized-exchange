@@ -28,9 +28,14 @@ const handleAccount = async dispatch => {
 }
 
 
-const handleContract = (chainId, contractName, provider, dispatch) => {
-    const contract = new ethers.Contract(config[chainId][contractName].address, abis[contractName], provider)
-    dispatch({ type: "CONTRACT_LOADED", contract, contractName })
+const handleContract = async (chainId, contractName, provider, dispatch) => {
+    let _cname = contractName === "exchange"?  contractName : "token"
+    const contract = new ethers.Contract(config[chainId][contractName].address, abis[_cname], provider)
+
+    let symbol;
+    if (contractName !== "exchange") symbol = await contract.symbol()
+
+    dispatch({ type: "CONTRACT_LOADED", contract, contractName, symbol })
 
     return contract
 }

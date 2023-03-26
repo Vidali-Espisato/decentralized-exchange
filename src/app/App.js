@@ -13,11 +13,14 @@ function App() {
     const provider = handleProvider(dispatch)
     const chainId = await handleNetwork(provider, dispatch)
 
-    const exchange = handleContract(chainId, "exchange", provider, dispatch)
+    const exchange = await handleContract(chainId, "exchange", provider, dispatch)
     console.log(exchange.address)
 
     const feePercent = await exchange.feePercent()
     console.log(feePercent.toString())
+
+    const dexToken = await handleContract(chainId, "DXT", provider, dispatch)
+    console.log(dexToken.address)
 
   }
 

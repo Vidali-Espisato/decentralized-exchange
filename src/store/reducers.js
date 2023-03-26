@@ -15,10 +15,11 @@ const provider = ( state={}, action ) => {
 }
 
 const contracts = ( state={}, action) => {
+    const { contractName, contract, symbol } = action
     switch (action.type) {
         case 'CONTRACT_LOADED':
             let _state = { ...state }
-            _state[`${action.contractName}`] = { ...action.contract, loaded: true }
+            _state[contractName] = { ...contract, symbol, loaded: true }
             return { ..._state }
 
         default:
