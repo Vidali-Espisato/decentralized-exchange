@@ -1,20 +1,19 @@
-import { ethers } from "ethers";
-import { useEffect, useState } from "react";
-import config from "../config.json"
-import exchangeAbi from "../abis/Exchange.json"
+import { useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { handleProvider, handleNetwork, handleContract, handleAccount } from "../store/handlers"
 
 
 function App() {
-  const [ accounts, setAccounts ] = useState([])
+  const dispatch = useDispatch()
 
   const loadBlockChainData = async () => {
-    const _accounts = await window.ethereum.request({method: "eth_requestAccounts"})
-    setAccounts(_accounts)
+    const account = await handleAccount(dispatch)
+    console.log(account)
 
-    const provider = new ethers.providers.Web3Provider(window.ethereum)
-    const { chainId } = await provider.getNetwork()
+    const provider = handleProvider(dispatch)
+    const chainId = await handleNetwork(provider, dispatch)
 
-    const exchange = new ethers.Contract(config[chainId].exchange.address, exchangeAbi, provider)
+    const exchange = handleContract(chainId, "exchange", provider, dispatch)
     console.log(exchange.address)
 
     const feePercent = await exchange.feePercent()
