@@ -1,5 +1,5 @@
-import exchangeAbi from "../abis/Exchange.json"
-import tokenAbi from "../abis/Token.json"
+import exchangeAbi from "./Exchange.json"
+import tokenAbi from "./Token.json"
 
 
 export default {

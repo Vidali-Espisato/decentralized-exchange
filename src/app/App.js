@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { handleProvider, handleNetwork, handleContract, handleAccount } from "../store/handlers"
+import { handleProvider, handleNetwork, handleContract, handleAccount } from "store/handlers"
 
 
 function App() {

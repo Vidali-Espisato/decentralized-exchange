@@ -1,6 +1,6 @@
 import { ethers } from "ethers"
-import config from "../config.json"
-import abis from "../abis"
+import config from "config.json"
+import abis from "abis"
 
 
 const handleProvider = dispatch => {
