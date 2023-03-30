@@ -24,7 +24,7 @@ const handleAccount = async (provider, dispatch) => {
     const address = ethers.utils.getAddress(accounts[0])
 
     let balance = await provider.getBalance(address)
-    balance = ethers.utils.formatEther(balance)
+    balance = parseFloat(ethers.utils.formatEther(balance))
 
     const account = { address, balance }
     dispatch({ type: "ACCOUNT_LOADED", account })
