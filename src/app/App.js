@@ -1,6 +1,7 @@
-import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { handleProvider, handleNetwork, handleContract, handleAccount } from "store/handlers"
+import { Navbar } from "components"
+import { useEffect } from "react";
 
 
 function App() {
@@ -10,8 +11,9 @@ function App() {
     const provider = handleProvider(dispatch)
     const chainId = await handleNetwork(provider, dispatch)
 
-    const account = await handleAccount(provider, dispatch)
-    console.log(account)
+    window.ethereum.on('accountsChanged', async () => {
+      await handleAccount(provider, dispatch)
+    })
 
     const exchange = await handleContract(chainId, "exchange", provider, dispatch)
     console.log(exchange.address)
@@ -21,7 +23,6 @@ function App() {
 
     const dexToken = await handleContract(chainId, "DXT", provider, dispatch)
     console.log(dexToken.address)
-
   }
 
   useEffect(() => {
@@ -31,6 +32,7 @@ function App() {
 
   return (
     <div>
+      <Navbar />
       <main className='exchange grid'>
         <section className='exchange__section--left grid'>
 
