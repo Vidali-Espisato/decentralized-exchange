@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import Blockies from 'react-blockies'
 import { handleAccount } from 'store/handlers'
+import ethLogo from 'assets/eth.svg'
+import config from 'config.json'
 
 
 function Navbar() {
@@ -10,6 +12,7 @@ function Navbar() {
     const [ balance, setBalance ] = useState(0)
     const account = useSelector(state => state.provider.account)
     const provider = useSelector(state => state.provider.connection)
+    const chainId = useSelector(state => state.provider.chainId)
 
     useEffect(() => {
         if (account) {
@@ -19,6 +22,10 @@ function Navbar() {
     }, [ account ])
 
     const accountHandler = async () => await handleAccount(provider, dispatch)
+    const networkHandler = event => window.ethereum.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: event.target.value }]
+    })
 
     return(
         <div className='exchange__header grid'>
@@ -26,7 +33,16 @@ function Navbar() {
                 <h1>DXT Token Exchange</h1>
             </div>
 
-            <div className='exchange__header--networks flex'>
+            <div className='exchange__header--networks flex' onChange={ networkHandler }>
+                <img src={ ethLogo } />
+                <select name="networks" id="networks" value={ config[chainId] ? `0x${ Number(chainId).toString(16) }` : "0" }>
+                    <option value="0" disabled>Select Network</option>
+                    {
+                        Object.entries(config).map(([k, v]) => (
+                            <option value={ `0x${ Number(k).toString(16) }` }>{ v.chainName }</option>
+                        ))
+                    }
+                </select>
             </div>
 
             <div className='exchange__header--account flex'>
@@ -42,7 +58,7 @@ function Navbar() {
                                 bgColor="#F1F2F9"
                                 spotColor="#767F92"
                                 className="identicon"
-                                />
+                            />
                         </a>
                     ) : (
                         <button className="button" onClick={ accountHandler }>Connect</button>
