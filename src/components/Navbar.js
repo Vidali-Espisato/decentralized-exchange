@@ -49,7 +49,8 @@ function Navbar() {
                 <p><small>Balance: </small>{ balance.toFixed(4) } ETH</p>
                 {
                     account ? (
-                        <a href="">{ `${address.slice(0, 6)}...${address.slice(-4)}` }
+                        <a href={ `https://${ config[chainId]?.chainName.toLowerCase() }.etherscan.io/address/${ address }` } target="_blank">
+                            { `${address.slice(0, 6)}...${address.slice(-4)}` }
                             <Blockies
                                 seed={ address }
                                 size={ 10 }
