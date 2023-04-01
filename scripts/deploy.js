@@ -1,7 +1,8 @@
 const fs = require('fs');
+const config = require('src/config.json')
 
 const writeToFile = (data, chainId) => {
-  const result = {}
+  const result = { ...config }
   result[chainId] = {}
 
   data.forEach(item => {
