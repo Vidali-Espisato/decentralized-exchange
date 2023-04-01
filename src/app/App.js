@@ -11,6 +11,8 @@ function App() {
     const provider = handleProvider(dispatch)
     const chainId = await handleNetwork(provider, dispatch)
 
+    window.ethereum.on('chainChanged', () => window.location.reload())
+
     window.ethereum.on('accountsChanged', async () => {
       await handleAccount(provider, dispatch)
     })
