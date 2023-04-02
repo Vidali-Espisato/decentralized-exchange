@@ -6,6 +6,7 @@ import { useEffect } from "react";
 
 function App() {
   const dispatch = useDispatch()
+  const tokens = [ "DXT", "mETH", "mDAI" ]
 
   const loadBlockChainData = async () => {
     const provider = handleProvider(dispatch)
@@ -18,13 +19,10 @@ function App() {
     })
 
     const exchange = await handleContract(chainId, "exchange", provider, dispatch)
-    console.log(exchange.address)
 
-    const feePercent = await exchange.feePercent()
-    console.log(feePercent.toString())
-
-    const dexToken = await handleContract(chainId, "DXT", provider, dispatch)
-    console.log(dexToken.address)
+    tokens.forEach(async token => {
+      await handleContract(chainId, token, provider, dispatch)
+    })
   }
 
   useEffect(() => {
