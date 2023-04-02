@@ -45,4 +45,8 @@ const handleContract = async (chainId, contractName, provider, dispatch) => {
     return contract
 }
 
-export { handleProvider, handleNetwork, handleAccount, handleContract }
+
+const handleMarket = (market, dispatch) => dispatch({ type: 'MARKET_SELECTED', market })
+
+
+export { handleProvider, handleNetwork, handleAccount, handleContract, handleMarket }
