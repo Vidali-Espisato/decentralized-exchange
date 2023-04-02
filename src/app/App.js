@@ -1,6 +1,6 @@
 import { useDispatch } from "react-redux";
 import { handleProvider, handleNetwork, handleContract, handleAccount } from "store/handlers"
-import { Navbar } from "components"
+import { Navbar, Markets } from "components"
 import { useEffect } from "react";
 
 
@@ -35,7 +35,7 @@ function App() {
       <Navbar />
       <main className='exchange grid'>
         <section className='exchange__section--left grid'>
-
+          <Markets />
         </section>
         <section className='exchange__section--right grid'>
 
