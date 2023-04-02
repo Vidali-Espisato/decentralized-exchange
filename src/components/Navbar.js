@@ -33,9 +33,9 @@ function Navbar() {
                 <h1>DXT Token Exchange</h1>
             </div>
 
-            <div className='exchange__header--networks flex' onChange={ networkHandler }>
+            <div className='exchange__header--networks flex'>
                 <img src={ ethLogo } />
-                <select name="networks" id="networks" value={ config[chainId] ? `0x${ Number(chainId).toString(16) }` : "0" }>
+                <select name="networks" id="networks" value={ config[chainId] ? `0x${ Number(chainId).toString(16) }` : "0" } onChange={ networkHandler }>
                     <option value="0" disabled>Select Network</option>
                     {
                         Object.entries(config).map(([k, v]) => (
