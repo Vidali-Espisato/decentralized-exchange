@@ -20,11 +20,8 @@ function Markets() {
 
     return (
         <div className='component exchange__markets'>
-            <div className='component__header'>
-                <h2>Select Market</h2>
-            </div>
-
-            <select name="markets" id="markets" value={ market?.symbols } onChange={ marketHandler }>
+            <select name="markets" id="markets" value={ market?.symbols || "0" } onChange={ marketHandler }>
+                <option value="0" disabled>Select Market</option>
                 {
                     pairs.map(([a, b]) => (
                         <option value={ `${ contracts[a]?.address } | ${ contracts[b]?.address }` }>{ `${a} / ${b}` }</option>
