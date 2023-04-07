@@ -3,6 +3,7 @@ import { handleProvider, handleNetwork, handleContract, handleAccount } from "st
 import { Navbar } from "components"
 import { useEffect, useState } from "react";
 import Markets from "./Markets";
+import Balance from "./Balance";
 
 
 function App() {
@@ -44,6 +45,7 @@ function App() {
       <main className='exchange grid'>
         <section className='exchange__section--left grid'>
           <Markets contractsLoaded={ Object.values(tokens).every(i => i) } />
+          <Balance />
         </section>
         <section className='exchange__section--right grid'>
 
