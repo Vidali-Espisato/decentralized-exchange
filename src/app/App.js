@@ -1,12 +1,13 @@
 import { useDispatch } from "react-redux";
 import { handleProvider, handleNetwork, handleContract, handleAccount } from "store/handlers"
-import { Navbar, Markets } from "components"
-import { useEffect } from "react";
+import { Navbar } from "components"
+import { useEffect, useState } from "react";
+import Markets from "./Markets";
 
 
 function App() {
   const dispatch = useDispatch()
-  const tokens = [ "DXT", "mETH", "mDAI" ]
+  const [ tokens, setTokens ] = useState({ "DXT": false, "mETH": false, "mDAI": false })
 
   const loadBlockChainData = async () => {
     const provider = handleProvider(dispatch)
@@ -20,8 +21,14 @@ function App() {
 
     const exchange = await handleContract(chainId, "exchange", provider, dispatch)
 
-    tokens.forEach(async token => {
-      await handleContract(chainId, token, provider, dispatch)
+    const tempTokens = { ...tokens }
+
+    Object.keys(tokens).forEach(async token => {
+      const loaded = await handleContract(chainId, token, provider, dispatch)
+      if (loaded) {
+        tempTokens[token] = true
+        setTokens(tempTokens)
+      }
     })
   }
 
@@ -29,13 +36,14 @@ function App() {
     loadBlockChainData()
   }, [])
 
+  console.log(tokens)
 
   return (
     <div>
       <Navbar />
       <main className='exchange grid'>
         <section className='exchange__section--left grid'>
-          <Markets />
+          <Markets contractsLoaded={ Object.values(tokens).every(i => i) } />
         </section>
         <section className='exchange__section--right grid'>
 
