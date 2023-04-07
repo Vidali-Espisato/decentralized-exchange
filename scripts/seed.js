@@ -9,8 +9,10 @@ async function main() {
     const { chainId } = await ethers.provider.getNetwork()
     const [ deployer, _, user1, user2, user3 ] = await ethers.getSigners()
 
-    let { exchange, DXT, mETH, mDAI } = Object.fromEntries(
+    let { chainName, exchange, DXT, mETH, mDAI } = Object.fromEntries(
         Object.entries(configData[chainId]).map(([k, v]) => {
+            if (k === "chainName") return [k, v]
+
             const key = k === 'exchange' ? "Exchange" : "Token"
             const _contract = ethers.getContractAt(key, v.address)
             return [k, _contract]

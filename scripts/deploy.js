@@ -1,9 +1,9 @@
 const fs = require('fs');
-const config = require('src/config.json')
+const config = require('../src/config.json')
 
 const writeToFile = (data, chainId) => {
   const result = { ...config }
-  result[chainId] = {}
+  result[chainId] = { chainName: "Localhost" }
 
   data.forEach(item => {
     result[chainId][item[0]] = {"address": item[1]}
